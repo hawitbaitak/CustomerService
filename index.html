@@ -9,13 +9,12 @@
             --navy: #1B2A47;
             --white: #FFFFFF;
             --brown: #A05A2C;
-            --bg-color: #F0F4F8;
             --text-color: #333;
         }
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
+            background-color: var(--navy); /* تم التعديل للون الكحلي */
             color: var(--text-color);
             display: flex;
             justify-content: center;
@@ -27,9 +26,9 @@
 
         .form-container {
             background-color: var(--white);
-            border-top: 8px solid var(--navy);
+            border-top: 8px solid var(--brown);
             border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
             width: 100%;
             max-width: 500px;
             padding: 30px;
@@ -41,8 +40,8 @@
         }
 
         .header img {
-            max-width: 150px;
-            margin-bottom: 10px;
+            max-width: 120px;
+            margin-bottom: 15px;
         }
 
         .header h2 {
@@ -127,7 +126,7 @@
 
 <div class="form-container">
     <div class="header">
-        <img src="logo1.png" alt="شعار الشركة" onerror="this.style.display='none'">
+        <img src="logo1.png" alt="شعار هوية بيتك" onerror="this.style.display='none'">
         <h2>تسجيل طلب جديد</h2>
     </div>
 
@@ -168,6 +167,9 @@
 </div>
 
 <script>
+    // الرابط الخاص بيك
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbzMNIf6KLI1xt7tYWAWVs8vzfXnfXK7FSxOt-m2RHMmJOfU6mQOmFd-nhPg5F9Ov7G2FQ/exec';
+
     function handleFormSubmit(event) {
         event.preventDefault();
         
@@ -184,20 +186,30 @@
             platform: document.getElementById('platform').value
         };
 
-        // Call Google Apps Script backend
-        google.script.run
-            .withSuccessHandler(function(response) {
+        // إرسال البيانات باستخدام fetch
+        fetch(scriptURL, {
+            method: 'POST',
+            // استخدام text/plain بيمنع مشاكل الـ CORS مع Google Apps Script
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify(formData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if(data.status === "success") {
                 btn.disabled = false;
                 btn.innerText = 'إرسال الطلب';
                 document.getElementById('orderForm').reset();
                 showStatus('تم تسجيل الطلب بنجاح!', 'success');
-            })
-            .withFailureHandler(function(error) {
-                btn.disabled = false;
-                btn.innerText = 'إرسال الطلب';
-                showStatus('حدث خطأ أثناء الإرسال. حاول مرة أخرى.', 'error');
-            })
-            .submitOrder(formData);
+            } else {
+                throw new Error(data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error!', error.message);
+            btn.disabled = false;
+            btn.innerText = 'إرسال الطلب';
+            showStatus('حدث خطأ أثناء الإرسال. حاول مرة أخرى.', 'error');
+        });
     }
 
     function showStatus(message, type) {
