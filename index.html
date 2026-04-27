@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدخال طلبات خدمة العملاء</title>
+    <style>
+        :root {
+            --navy: #1B2A47;
+            --white: #FFFFFF;
+            --brown: #A05A2C;
+            --bg-color: #F0F4F8;
+            --text-color: #333;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .form-container {
+            background-color: var(--white);
+            border-top: 8px solid var(--navy);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px;
+            padding: 30px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .header img {
+            max-width: 150px;
+            margin-bottom: 10px;
+        }
+
+        .header h2 {
+            color: var(--navy);
+            margin: 0;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--navy);
+        }
+
+        input[type="text"],
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 16px;
+            font-family: inherit;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--brown);
+            box-shadow: 0 0 0 2px rgba(160, 90, 44, 0.2);
+        }
+
+        button {
+            width: 100%;
+            background-color: var(--brown);
+            color: var(--white);
+            border: none;
+            padding: 14px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #8A4B23;
+        }
+
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        .alert {
+            display: none;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 4px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .alert.success {
+            background-color: #D4EDDA;
+            color: #155724;
+            border: 1px solid #C3E6CB;
+        }
+
+        .alert.error {
+            background-color: #F8D7DA;
+            color: #721C24;
+            border: 1px solid #F5C6CB;
+        }
+    </style>
+</head>
+<body>
+
+<div class="form-container">
+    <div class="header">
+        <img src="logo.png" alt="شعار الشركة" onerror="this.style.display='none'">
+        <h2>تسجيل طلب جديد</h2>
+    </div>
+
+    <form id="orderForm" onsubmit="handleFormSubmit(event)">
+        <div class="form-group">
+            <label for="employeeName">اسم الموظف *</label>
+            <select id="employeeName" name="employeeName" required>
+                <option value="" disabled selected>اختر اسم الموظف</option>
+                <option value="ريان">ريان</option>
+                <option value="وسام">وسام</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="orderNumber">رقم الطلب *</label>
+            <input type="text" id="orderNumber" name="orderNumber" placeholder="أدخل رقم الطلب" required>
+        </div>
+
+        <div class="form-group">
+            <label for="orderPrice">سعر الطلب *</label>
+            <input type="number" step="0.01" id="orderPrice" name="orderPrice" placeholder="أدخل السعر" required>
+        </div>
+
+        <div class="form-group">
+            <label for="platform">منصة الطلب *</label>
+            <select id="platform" name="platform" required>
+                <option value="" disabled selected>اختر المنصة</option>
+                <option value="بيزنس شات">بيزنس شات</option>
+                <option value="المنصة">المنصة</option>
+                <option value="واتساب">واتساب</option>
+            </select>
+        </div>
+
+        <button type="submit" id="submitBtn">إرسال الطلب</button>
+    </form>
+
+    <div id="statusMessage" class="alert"></div>
+</div>
+
+<script>
+    function handleFormSubmit(event) {
+        event.preventDefault();
+        
+        const btn = document.getElementById('submitBtn');
+        const statusDiv = document.getElementById('statusMessage');
+        btn.disabled = true;
+        btn.innerText = 'جاري الإرسال...';
+        statusDiv.style.display = 'none';
+
+        const formData = {
+            employee: document.getElementById('employeeName').value,
+            orderId: document.getElementById('orderNumber').value,
+            price: document.getElementById('orderPrice').value,
+            platform: document.getElementById('platform').value
+        };
+
+        // Call Google Apps Script backend
+        google.script.run
+            .withSuccessHandler(function(response) {
+                btn.disabled = false;
+                btn.innerText = 'إرسال الطلب';
+                document.getElementById('orderForm').reset();
+                showStatus('تم تسجيل الطلب بنجاح!', 'success');
+            })
+            .withFailureHandler(function(error) {
+                btn.disabled = false;
+                btn.innerText = 'إرسال الطلب';
+                showStatus('حدث خطأ أثناء الإرسال. حاول مرة أخرى.', 'error');
+            })
+            .submitOrder(formData);
+    }
+
+    function showStatus(message, type) {
+        const statusDiv = document.getElementById('statusMessage');
+        statusDiv.innerText = message;
+        statusDiv.className = 'alert ' + type;
+        statusDiv.style.display = 'block';
+        
+        setTimeout(() => {
+            statusDiv.style.display = 'none';
+        }, 5000);
+    }
+</script>
+
+</body>
+</html>
