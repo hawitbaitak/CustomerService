@@ -14,7 +14,7 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--navy); /* تم التعديل للون الكحلي */
+            background-color: var(--navy); /* الخلفية الكحلي */
             color: var(--text-color);
             display: flex;
             justify-content: center;
@@ -25,7 +25,7 @@
         }
 
         .form-container {
-            background-color: var(--white);
+            background-color: var(--white); /* البوكس أبيض */
             border-top: 8px solid var(--brown);
             border-radius: 8px;
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
@@ -126,7 +126,7 @@
 
 <div class="form-container">
     <div class="header">
-        <img src="logo1.png" alt="شعار هوية بيتك" onerror="this.style.display='none'">
+        <img src="logo.png" alt="شعار الشركة" onerror="this.style.display='none'">
         <h2>تسجيل طلب جديد</h2>
     </div>
 
@@ -167,8 +167,8 @@
 </div>
 
 <script>
-    // الرابط الخاص بيك
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbwu9oPL_y8PMOweiTfx9uFKzIQZdOEJYTUbtRK-aAzWtBpn6l_IZ8fyOfyG0LrKj6JMpg/exec';
+    // الرابط المباشر للسكريبت الخاص بك
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbyRLSu_tCMo7V_B9KWO3ZX4VDgT4LJ1REw7Wdcev66RGR8O5IN6LE_G8GxEdMDBTVBb9Q/exec';
 
     function handleFormSubmit(event) {
         event.preventDefault();
@@ -186,11 +186,12 @@
             platform: document.getElementById('platform').value
         };
 
-        // إرسال البيانات باستخدام fetch
+        // الإرسال كـ text/plain لتجاوز قيود CORS الخاصة بـ Google
         fetch(scriptURL, {
             method: 'POST',
-            // استخدام text/plain بيمنع مشاكل الـ CORS مع Google Apps Script
-            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            headers: {
+                'Content-Type': 'text/plain;charset=utf-8'
+            },
             body: JSON.stringify(formData)
         })
         .then(response => response.json())
@@ -201,7 +202,7 @@
                 document.getElementById('orderForm').reset();
                 showStatus('تم تسجيل الطلب بنجاح!', 'success');
             } else {
-                throw new Error(data.message);
+                throw new Error(data.message || 'خطأ غير معروف');
             }
         })
         .catch(error => {
